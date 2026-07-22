@@ -545,7 +545,7 @@
       }
 
       > div {
-        @apply space-y-2 flex items-center gap-2;
+        `@apply` flex items-center gap-2;
       }
 
       img {

@@ -23,7 +23,7 @@ const SubjectList = () => {
   const [selectDepartment, setSelectedDepartment] = useState("");
 
   const departmentFilters =
-    selectDepartment === "all"
+    !selectDepartment || selectDepartment === "all"
       ? []
       : [
           {
@@ -119,7 +119,7 @@ const SubjectList = () => {
               onValueChange={setSelectedDepartment}
             >
               <SelectTrigger>
-                <SelectValue placeholder="filter ny department" />
+                <SelectValue placeholder="filter by department" />
               </SelectTrigger>
 
               <SelectContent>
