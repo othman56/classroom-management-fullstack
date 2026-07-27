@@ -17,11 +17,12 @@ import { Subject } from "@/types";
 import { useTable } from "@refinedev/react-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { SearchIcon } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const SubjectList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const departmentFilters =
     !selectedDepartment || selectedDepartment === "all"
@@ -33,8 +34,13 @@ const SubjectList = () => {
             value: selectedDepartment,
           },
         ];
-  const searchFilters = searchQuery
-    ? [{ field: "name", operator: "contains" as const, value: searchQuery }]
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const searchFilters = debouncedSearch
+    ? [{ field: "name", operator: "contains" as const, value: debouncedSearch }]
     : [];
 
   const subjectColumns = useMemo<ColumnDef<Subject>[]>(
