@@ -1,63 +1,42 @@
-import {
-  DataProvider,
-  GetListResponse,
-  GetListParams,
-  BaseRecord,
-} from "@refinedev/core";
-import type { Subject } from "../types";
+import { createDataProvider, CreateDataProviderOptions } from "@refinedev/rest";
+import { BACKEND_BASE_URL } from "@/constants";
+import { ListResponse } from "@/types";
 
-const mockSubjects: Subject[] = [
-  {
-    id: 1,
-    name: "Introduction to Computer Science",
-    code: "CS101",
-    description:
-      "A foundational course covering programming concepts and problem-solving.",
-    department: "CS",
-    createdAt: "2024-01-15T09:00:00.000Z",
-  },
-  {
-    id: 2,
-    name: "Data Structures and Algorithms",
-    code: "CS201",
-    description:
-      "Explores core data structures, algorithms, and algorithmic analysis.",
-    department: "Computer Science",
-    createdAt: "2024-01-16T09:00:00.000Z",
-  },
-  {
-    id: 3,
-    name: "Linear Algebra",
-    code: "MATH201",
-    description: "Covers vectors, matrices, and systems of linear equations.",
-    department: "Maths",
-    createdAt: "2024-01-17T09:00:00.000Z",
-  },
-];
+const options: CreateDataProviderOptions = {
+  getList: {
+    getEndpoint: ({ resource }) => resource,
 
-export const dataProvider = {
-  getList: async <TData extends BaseRecord = BaseRecord>({
-    resource,
-  }: GetListParams): Promise<GetListResponse<TData>> => {
-    if (resource !== "subjects") return { data: [] as TData[], total: 0 };
+    buildQueryParams: async ({ resource, pagination, filters }) => {
+      const page = pagination?.currentPage ?? 1;
+      const pageSize = pagination?.pageSize ?? 10;
 
-    return {
-      data: mockSubjects as unknown as TData[],
-      total: mockSubjects.length,
-    };
-  },
+      const params: Record<string, string | number> = { page, limit: pageSize };
 
-  getOne: async () => {
-    throw new Error("Method not implemented.");
+      filters?.forEach((filter) => {
+        const field = "field" in filter ? filter.field : "";
+
+        if (Array.isArray(filter.value) || filter.value == null) return;
+        const value = String(filter.value);
+
+        if (resource === "subjects") {
+          if (field === "department") params.department = value;
+          if (field === "name" || field === "code") params.search = value;
+        }
+      });
+      return params;
+    },
+
+    mapResponse: async (response) => {
+      const payload: ListResponse = await response.clone().json();
+      return payload.data ?? [];
+    },
+
+    getTotalCount: async (response) => {
+      const payload: ListResponse = await response.clone().json();
+      return payload.pagination?.total ?? payload.data?.length ?? 0;
+    },
   },
-  create: async () => {
-    throw new Error("Method not implemented.");
-  },
-  update: async () => {
-    throw new Error("Method not implemented.");
-  },
-  deleteOne: async () => {
-    throw new Error("Method not implemented.");
-  },
-  getApiUrl: () => "",
-} as DataProvider;
+};
+const { dataProvider } = createDataProvider(BACKEND_BASE_URL, options);
+
+export { dataProvider };
