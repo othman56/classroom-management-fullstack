@@ -55,15 +55,39 @@ export const ALLOWED_TYPES = [
   "image/webp",
 ];
 
-export const CLOUDINARY_UPLOAD_URL = import.meta.env.VITE_CLOUDINARY_UPLOAD_URL;
-export const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-export const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
+const getEnv = (key: string, fallback = ""): string => {
+  const value = import.meta.env[key as keyof ImportMetaEnv];
 
-export const BASE_URL = import.meta.env.VITE_API_URL;
-export const ACCESS_TOKEN_KEY = import.meta.env.VITE_ACCESS_TOKEN_KEY;
-export const REFRESH_TOKEN_KEY = import.meta.env.VITE_REFRESH_TOKEN_KEY;
+  if (typeof value === "string" && value.trim() !== "") {
+    return value;
+  }
+
+  return fallback;
+};
+
+export const CLOUDINARY_UPLOAD_URL = getEnv(
+  "VITE_CLOUDINARY_UPLOAD_URL",
+  "https://api.cloudinary.com/v1_1/placeholder/image/upload",
+);
+export const CLOUDINARY_CLOUD_NAME = getEnv(
+  "VITE_CLOUDINARY_CLOUD_NAME",
+  "placeholder",
+);
+export const BACKEND_BASE_URL = getEnv(
+  "VITE_BACKEND_BASE_URL",
+  "http://localhost:8000/api/",
+);
+
+export const BASE_URL = getEnv("VITE_API_URL", BACKEND_BASE_URL);
+export const ACCESS_TOKEN_KEY = getEnv("VITE_ACCESS_TOKEN_KEY", "access_token");
+export const REFRESH_TOKEN_KEY = getEnv(
+  "VITE_REFRESH_TOKEN_KEY",
+  "refresh_token",
+);
 
 export const REFRESH_TOKEN_URL = `${BASE_URL}/refresh-token`;
 
-export const CLOUDINARY_UPLOAD_PRESET = import.meta.env
-  .VITE_CLOUDINARY_UPLOAD_PRESET;
+export const CLOUDINARY_UPLOAD_PRESET = getEnv(
+  "VITE_CLOUDINARY_UPLOAD_PRESET",
+  "classroom-management",
+);
