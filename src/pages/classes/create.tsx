@@ -24,8 +24,8 @@ import { classSchema } from "@/lib/schema";
 import { useForm } from "@refinedev/react-hook-form";
 import { useBack } from "@refinedev/core";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import UploadWidget from "@/components/upload-widget";
 import { UploadWidgetValue } from "@/types";
 
@@ -52,7 +52,7 @@ type ClassForm = z.infer<typeof classSchema>;
 const CreateClasses = () => {
   const back = useBack();
 
-  const form = useForm<ClassForm>({
+  const form = useForm({
     resolver: zodResolver(classSchema),
     refineCoreProps: {
       resource: "classes",
