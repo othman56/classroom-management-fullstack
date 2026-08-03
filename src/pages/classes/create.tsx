@@ -27,6 +27,7 @@ import { useBack } from "@refinedev/core";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import UploadWidget from "@/components/upload-widget";
+import { UploadWidgetValue } from "@/types";
 
 const teachers = [
   { id: 1, name: "John Smith" },
@@ -66,21 +67,6 @@ const CreateClasses = () => {
   } = form;
 
   const bannerPublicId = form.watch("bannerCldPubId");
-  const setBannerImage = (file, field) => {
-    if (file) {
-      field.onChange(file.url);
-      form.setValue("bannerCldPubId", file.publicId, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    } else {
-      field.onChange("");
-      form.setValue("bannerCldPubId", "", {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    }
-  };
 
   async function onSubmit(values: ClassForm) {
     try {
@@ -118,32 +104,51 @@ const CreateClasses = () => {
                 <FormField
                   name="bannerUrl"
                   control={control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Banner Image <span className="text-orange-600">*</span>
-                      </FormLabel>{" "}
-                      <FormControl>
-                        <UploadWidget
-                          value={
-                            field.value
-                              ? {
-                                  url: field.value,
-                                  publicId: bannerPublicId ?? "",
-                                }
-                              : null
-                          }
-                          onChange={(file: any, field: any) =>
-                            setBannerImage(file, field)
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                      {errors.bannerCldPubId && !errors.bannerUrl && (
-                        <p>{errors.bannerCldPubId.message?.toString()}</p>
-                      )}
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const handleBannerUpload = (
+                      file: UploadWidgetValue | null,
+                    ) => {
+                      if (file) {
+                        field.onChange(file.url);
+                        form.setValue("bannerCldPubId", file.publicId, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                      } else {
+                        field.onChange("");
+                        form.setValue("bannerCldPubId", "", {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
+                      }
+                    };
+
+                    return (
+                      <FormItem>
+                        <FormLabel>
+                          Banner Image{" "}
+                          <span className="text-orange-600">*</span>
+                        </FormLabel>{" "}
+                        <FormControl>
+                          <UploadWidget
+                            value={
+                              field.value
+                                ? {
+                                    url: field.value,
+                                    publicId: bannerPublicId ?? "",
+                                  }
+                                : null
+                            }
+                            onChange={handleBannerUpload}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                        {errors.bannerCldPubId && !errors.bannerUrl && (
+                          <p>{errors.bannerCldPubId.message?.toString()}</p>
+                        )}
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField

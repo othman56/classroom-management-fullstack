@@ -3,17 +3,20 @@ import { UploadWidgetProps, UploadWidgetValue } from "@/types";
 import { UploadCloud } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const UploadWidget = ({ value = null, onChange, disabled = false }) => {
+const UploadWidget = ({
+  value = null,
+  onChange,
+  disabled = false,
+}: UploadWidgetProps) => {
   const widgetRef = useRef<CloudinaryWidget | null>(null);
   const onChangeRef = useRef(onChange);
 
-  const [preview, setPreview] = useState<UploadWidgetProps | null>(value);
-  const [deleteToken, setDeleteToken] = useState<string | null>(null);
-  const [isRemoving, setIsRemoving] = useState(false);
+  const [preview, setPreview] = useState<UploadWidgetValue | null>(
+    value ?? null,
+  );
 
   useEffect(() => {
-    setPreview(value);
-    setDeleteToken(null);
+    setPreview(value ?? null);
   }, [value]);
 
   useEffect(() => {
@@ -78,7 +81,7 @@ const UploadWidget = ({ value = null, onChange, disabled = false }) => {
           tabIndex={0}
           onClick={openWidget}
           onKeyDown={(event) => {
-            if (event.key === "Enter") {
+            if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();
               openWidget();
             }
