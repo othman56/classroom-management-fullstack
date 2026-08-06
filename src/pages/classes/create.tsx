@@ -22,35 +22,40 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { classSchema } from "@/lib/schema";
 import { useForm } from "@refinedev/react-hook-form";
-import { useBack } from "@refinedev/core";
+import { useBack, useList } from "@refinedev/core";
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import UploadWidget from "@/components/upload-widget";
-import { UploadWidgetValue } from "@/types";
-
-const teachers = [
-  { id: 1, name: "John Smith" },
-  { id: 2, name: "Sarah Johnson" },
-  { id: 3, name: "Michael Brown" },
-];
-
-const subjects = [
-  { id: 1, name: "Mathematics", code: "MATH" },
-  { id: 2, name: "English Literature", code: "ENLIT" },
-  { id: 3, name: "Physics", code: "PHYS" },
-  { id: 4, name: "History", code: "HIST" },
-];
+import { Subject, UploadWidgetValue, User } from "@/types";
 
 const CLASS_STATUS = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
 ] as const;
 
-type ClassForm = z.infer<typeof classSchema>;
-
 const CreateClasses = () => {
   const back = useBack();
+
+  const { query: subjectsQuery } = useList<Subject>({
+    resource: "subjects",
+    pagination: {
+      pageSize: 100,
+    },
+  });
+  const { query: TeachersQuery } = useList<User>({
+    resource: "users",
+    filters: [{ field: "role", operator: "eq", value: "teacher" }],
+    pagination: {
+      pageSize: 100,
+    },
+  });
+
+  const subjects = subjectsQuery?.data?.data || [];
+  const subjectsLoading = subjectsQuery?.isLoading;
+
+  const teachers = TeachersQuery?.data?.data || [];
+  const TeachersLoading = TeachersQuery?.isLoading;
 
   const form = useForm({
     resolver: zodResolver(classSchema),
@@ -61,20 +66,21 @@ const CreateClasses = () => {
   });
 
   const {
+    refineCore: { onFinish },
     handleSubmit,
-    formState: { isSubmitting, errors },
+    formState: { errors },
     control,
   } = form;
 
   const bannerPublicId = form.watch("bannerCldPubId");
 
-  async function onSubmit(values: ClassForm) {
+  const onSubmit = async (values: z.infer<typeof classSchema>) => {
     try {
-      console.log(values);
+      await onFinish(values);
     } catch (e) {
       console.error("Error creating classes", e);
     }
-  }
+  };
 
   return (
     <CreateView className="class-view">
@@ -184,6 +190,7 @@ const CreateClasses = () => {
                             field.onChange(Number(value))
                           }
                           value={field.value?.toString() ?? ""}
+                          disabled={subjectsLoading}
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
@@ -218,7 +225,8 @@ const CreateClasses = () => {
                         </FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(value)}
-                          value={field.value ?? ""}
+                          value={field.value?.toString() ?? ""}
+                          disabled={TeachersLoading}
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
